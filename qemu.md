@@ -11,11 +11,11 @@ Start (during install)
 exec qemu-system-x86_64 -enable-kvm \
         -cpu host \
         -drive file=Gentoo-VM.img,if=virtio \
-        -netdev user,id=vmnic,hostname=Gentoo-VM \
-        -device virtio-net,netdev=vmnic \
+        -net nic \
+        -net bridge,br=br0 \
         -device virtio-rng-pci \
         -m 2048M \
-        -smp 6 \
+        -smp cores=3,threads=2,sockets=1 \
         -monitor stdio \
         -name "Gentoo VM" \
         $@
@@ -24,7 +24,7 @@ exec qemu-system-x86_64 -enable-kvm \
 Run install
 
 ```bash
-./start_Gentoo_VM.sh -boot d -cdrom minimal-amd64iso
+./start_Gentoo_VM.sh -boot d -cdrom minimal-amd64.iso
 ```
 
 Start (after install)
