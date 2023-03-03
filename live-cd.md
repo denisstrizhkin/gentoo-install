@@ -1,23 +1,23 @@
-Set root password
+Set `root` password
 
-```bash
-passwd root
+```console
+# passwd root
 ```
 
-Change sshd settings `PasswordAuthentication yes`
+Change `sshd` settings `PasswordAuthentication yes`
 
-```bash
-vi /etc/ssh/sshd_config
+```console
+# vi /etc/ssh/sshd_config
 ```
 
-Start ssh
+Start `sshd`
 
-```bash
-/etc/init.d/sshd start
+```console
+# /etc/init.d/sshd start
 ```
 
-Check ip
+Check ip (then `ssh` into it)
 
-```bash
-ip a
+```console
+# ip a
 ```
