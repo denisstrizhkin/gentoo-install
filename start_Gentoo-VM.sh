@@ -6,7 +6,7 @@ exec qemu-system-x86_64 -enable-kvm \
         -net nic \
         -net bridge,br=br0 \
         -device virtio-rng-pci \
-        -m 2048M \
+        -m 6144M \
         -smp cores=6,threads=1,sockets=1 \
         -display gtk \
         -vga qxl \
