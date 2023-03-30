@@ -4,6 +4,8 @@ TARBALL_URL='https://bouncer.gentoo.org/fetch/root/all/releases/amd64/autobuilds
 MIRROR_URL='https://mirror.yandex.ru/gentoo-distfiles/'
 
 
+cp ./make.conf /mnt/gentoo
+
 cd /mnt/gentoo
 
 wget "${URL}"
@@ -11,6 +13,8 @@ wget "${URL}"
 tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 
 rm *.tar.xz
+
+mv ./make.conf /mnt/gentoo/etc/portage/make.conf
 
 echo "GENTOO_MIRRORS=\"${MIRROR_URL}\"" >> /mnt/gentoo/etc/portage/make.conf
 
