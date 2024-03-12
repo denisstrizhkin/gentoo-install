@@ -5,6 +5,12 @@
 I will try to follow handbook as much as possible. Haven't read it
 in a long time
 
+** TODO touch empty cmdline
+** TODO use sed for march native
+** TODO do locales before @world update?
+** TODO setup system-machine-id before kernel?
+
+
 * Checking that everything is ok
 
 ** Check that drives are there :-)

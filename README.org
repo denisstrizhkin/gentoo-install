@@ -1,0 +1,18 @@
+#+title: Speedrunning Gentoo
+
+I always wanted to create notes for Gentoo setup
+with the least amount of optional steps. And see how
+fast you can install it. However I am not ditching any useful
+tools or setup steps. The idea is that you get a fully usable
+system at the end
+
+* SystemD XFS TTY
+
+plain install based on stable systemd merged-usr profile using xfs
+file system and default layout from handbook with systemd-boot
+
+- Use default layout
+- Use xfs
+- Install networking stack (NetworkManager)
+- Use systemd-boot
+- Make it boot :-)
