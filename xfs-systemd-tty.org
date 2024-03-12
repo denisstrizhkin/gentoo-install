@@ -1,0 +1,233 @@
+#+title: Gentoo Speedrun
+
+* Gentoo Install xfs%
+
+I will try to follow handbook as much as possible. Haven't read it
+in a long time
+
+* Checking that everything is ok
+
+** Check that drives are there :-)
+#+BEGIN_SRC bash
+lsblk -f
+#+END_SRC
+
+** Check network connection
+#+begin_src  bash
+ping gentoo.org
+#+end_src
+
+** Check efivars
+#+begin_src bash
+ls /sys/firmware/efi/efivars
+#+end_src
+
+* Format the drives
+
+I will use layout from the handbook for EFI GPT setup.
+3 partitions consisting of efi partition (fat32), swap partition
+(I will allocate only 1gb for swap just as example), rootfs parrition (xfs)
+
+** Creating a new disklabel
+#+begin_src bash
+echo 'label: gpt' | sfdisk /dev/vda
+#+end_src
+
+** Creating partitions
+#+begin_src bash
+echo -e 'size=256M, type=uefi, bootable \n size=1G, type=swap \n size=+, type="linux root x86-64"' | sfdisk /dev/vda
+#+end_src
+
+* Filesystems
+** EFI partition
+#+begin_src bash
+mkfs.fat -n EFI -F32 /dev/vda1
+#+end_src
+
+** swap partition
+#+begin_src bash
+mkswap -L swap /dev/vda2
+swapon -L swap
+#+end_src
+
+** rootfs parition
+#+begin_src bash
+mkfs.xfs -L rootfs /dev/vda3
+#+end_src
+
+** check myself
+#+begin_src bash
+lsblk -f
+#+end_src
+
+** mount rootfs partition
+#+begin_src bash
+mount /dev/vda3 /mnt/gentoo
+#+end_src
+
+* Getting stage3
+** Sync live image clock
+#+begin_src bash
+chronyd -q
+#+end_src
+
+** Download stage3
+I will use default systemd merged-usr here
+#+begin_src bash
+cd /mnt/gentoo
+links gentoo.org
+#+end_src
+
+Check stage3
+#+begin_src bash
+sha256sum -c stage3<...>.tar.xz.sha256.xz
+#+end_src
+
+** Installing stage3
+#+begin_src bash
+tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
+#+end_src
+
+* Chrooting
+
+** Set march=native
+#+begin_src bash
+nano /mnt/gentoo/etc/portage/make.conf
+#+end_src
+
+** Chroot
+#+begin_src bash
+cp --dereference /etc/resolv.conf /mnt/gentoo/etc
+arch-chroot /mnt/gentoo
+#+end_src
+
+** Mount EFI partition
+#+begin_src bash
+mkdir /efi
+mount /dev/vda1 /efi
+#+end_src
+
+* Syncing repos
+
+** Copy repos.conf
+#+begin_src bash
+cp /usr/share/portage/config/repos.conf /etc/portage
+#+end_src
+
+** Getting repo snapshot
+#+begin_src bash
+emerge-webrsync
+#+end_src
+
+** Selecting mirrors
+#+begin_src bash
+emerge mirrorselect && mirrorselect -S -R Europe -s3
+#+end_src
+
+** Syncing mirrors
+#+begin_src bash
+emerge --sync
+#+end_src
+
+* Setting up binhost and profile
+
+** Setup gpg keys
+#+begin_src bash
+gentuto
+#+end_src
+
+** Set portage FEATURES
+#+begin_src bash
+echo -e '\n FEATURES="${FEATURES} getbinpkg binpkg-request-signature"' >> /etc/portage/make.conf
+#+end_src
+
+** Check that profile is correct
+#+begin_src bash
+eselect profile show
+#+end_src
+
+* Setting CPU flags and updating world
+
+** Get bash-completion & cpuidflags
+#+begin_src bash
+emerge bash-completion
+emerge cpuid2cpuflags
+#+end_src
+
+** Set cpu flags
+#+begin_src bash
+rmdir /etc/portage/package.use
+echo "*/* $(cpuid2cpuflags)" > /etc/portage/package.use
+#+end_src
+
+** Update @world
+#+begin_src bash
+emerge -avDNu @world
+#+end_src
+
+* Setting locales
+** Generate locales
+#+begin_src bash
+echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
+locale-gen
+#+end_src
+
+** Set locale to en_US.UTF-E
+#+begin_src bash
+eselect locale set <N>
+env-update && source /etc/profile
+#+end_src
+
+* Kernel and Firmware
+
+** Get firmware
+#+begin_src bash
+echo 'sys-kernel/linux-firmware linux-fw-redistributable' > /etc/portage/package.license
+emerge linux-firmware
+#+end_src
+
+** Get kernel
+#+begin_src bash
+echo 'sys-kernel/installkernel dracut systemd-boot\nsys-apps/systemd boot' >> /etc/portage/package.use
+emerge -av gentoo-kernel-bin
+#+end_src
+
+* Network Stack
+** Install NetworkManager
+#+begin_src bash
+echo 'net-misc/networkmanager iwd' >> /etc/portage/package.use
+emerge networkmanager
+systemctl enable NetworkManager
+#+end_src
+
+* Fstab
+#+begin_src bash
+echo 'LABEL=EFI /efi vfat umask=0077 0 2' > /etc/fstab
+echo 'LABEL=swap none swap sw 0 0' >> /etc/fstab
+echo 'LABEL=rootfs / xfs defaults,noatime 0 1' >> /etc/fstab
+#+end_src
+
+* Initial System Configuration
+** Set root password
+#+begin_src bash
+passwd
+#+end_src
+
+** SystemD initial setup
+#+begin_src bash
+systemd-machine-id-setup
+systemd-firstboot --prompt
+systemctl preset-all --preset-mode=enable-only
+#+end_src
+
+* Bootloader
+#+begin_src bash
+bootctl install
+emerge --config gentoo-kernel-bin
+#+end_src
+
+* Reboot :-)
+#+begin_src bash
+exit
+reboot
+#+end_src
