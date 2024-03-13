@@ -95,31 +95,54 @@ tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 
 Set march=native
 #+begin_src bash
-nano /mnt/gentoo/etc/portage/make.conf
+cd /mnt/gentoo
+nano ./etc/portage/make.conf
 #+end_src
 
 Chroot
 #+begin_src bash
-cp -L /etc/resolv.conf /mnt/gentoo/etc
-arch-chroot /mnt/gentoo
+cp -L /etc/resolv.conf ./etc
+arch-chroot .
 #+end_src
 
 Mount EFI partition
 #+begin_src bash
 mkdir /efi
 mount /dev/vda1 /efi
+cd /etc/portage
 #+end_src
 
 * Syncing repositories
 
 Copy repos.conf
 #+begin_src bash
-cp /usr/share/portage/config/repos.conf /etc/portage
+cp /usr/share/portage/config/repos.conf .
+#+end_src
+
+Set FEATURES
+#+begin_src bash
+echo 'FEATURES="${FEATURES} getbinpkg binpkg-request-signature parallel-install -ebuild-locks"' >> /etc/portage/make.conf
 #+end_src
 
 Getting repositories snapshot
 #+begin_src bash
 emerge-webrsync
+#+end_src
+
+Get bash-completion
+#+begin_src bash
+emerge bash-completion
+source /etc/profile
+#+end_src
+
+Setup GPG keys
+#+begin_src bash
+getuto
+#+end_src
+
+Emerge tmux
+#+begin_src bash
+emerge tmux
 #+end_src
 
 Selecting mirrors
@@ -130,23 +153,6 @@ emerge mirrorselect && mirrorselect -S -R Europe -s3
 Syncing mirrors
 #+begin_src bash
 emerge --sync
-#+end_src
-
-* Setting up binhost and profile
-
-Setup GPG keys
-#+begin_src bash
-getuto
-#+end_src
-
-Set portage FEATURES
-#+begin_src bash
-echo -e '\n FEATURES="${FEATURES} getbinpkg binpkg-request-signature"' >> /etc/portage/make.conf
-#+end_src
-
-Check that profile is correct
-#+begin_src bash
-eselect profile show
 #+end_src
 
 * Setting locales
@@ -167,7 +173,6 @@ env-update && source /etc/profile
 
 Get bash-completion & cpuidflags
 #+begin_src bash
-emerge bash-completion
 emerge cpuid2cpuflags
 #+end_src
 
@@ -179,7 +184,7 @@ echo "*/* $(cpuid2cpuflags)" > /etc/portage/package.use
 
 Update @world
 #+begin_src bash
-emerge -avDNu @world
+emerge -j5 -DNu @world
 #+end_src
 
 * Kernel and Firmware
