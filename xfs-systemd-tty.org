@@ -67,14 +67,9 @@ cd /mnt/gentoo
 links gentoo.org
 #+end_src
 
-Check stage3
-#+begin_src bash
-sha256sum -c stage3-*.tar.xz.sha256.xz
-#+end_src
-
 Installing stage3
 #+begin_src bash
-tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
+tar xpf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 #+end_src
 
 * Chrooting
