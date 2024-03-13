@@ -43,18 +43,17 @@ echo -e 'size=256M, type="efi system", bootable \n size=1G, type="swap" \n size=
 * Filesystems
 EFI partition
 #+begin_src bash
-mkfs.fat -n EFI -F32 /dev/vda1
+mkfs.fat -F32 /dev/vda1
 #+end_src
 
 swap partition
 #+begin_src bash
-mkswap -L swap /dev/vda2
-swapon -L swap
+mkswap /dev/vda2
 #+end_src
 
 rootfs parition
 #+begin_src bash
-mkfs.xfs -L rootfs /dev/vda3
+mkfs.xfs /dev/vda3
 #+end_src
 
 Check myself
