@@ -37,7 +37,7 @@ echo 'label: gpt' | sfdisk /dev/vda
 
 Creating partitions
 #+begin_src bash
-echo -e 'size=256M, type=uefi, bootable \n size=1G, type=swap \n size=+, type="linux root x86-64"' | sfdisk /dev/vda
+echo -e 'size=256M, type="efi system", bootable \n size=1G, type="swap" \n size=+, type="linux root x86-64"' | sfdisk /dev/vda
 #+end_src
 
 * Filesystems
@@ -206,6 +206,7 @@ Get kernel
 #+begin_src bash
 echo 'sys-kernel/installkernel dracut systemd-boot\nsys-apps/systemd boot' >> /etc/portage/package.use
 touch /etc/kernel/cmdline
+> /etc/fstab
 emerge -av gentoo-kernel-bin
 #+end_src
 
@@ -218,14 +219,6 @@ emerge networkmanager
 systemctl enable NetworkManager
 #+end_src
 
-* Fstab
-
-#+begin_src bash
-echo 'LABEL=EFI /efi vfat umask=0077 0 2' > /etc/fstab
-echo 'LABEL=swap none swap sw 0 0' >> /etc/fstab
-echo 'LABEL=rootfs / xfs defaults,noatime 0 1' >> /etc/fstab
-#+end_src
-
 * Initial System Configuration
 
 Set root password
@@ -235,12 +228,14 @@ passwd
 
 
 * Bootloader
+
 #+begin_src bash
 bootctl install
 emerge --config gentoo-kernel-bin
 #+end_src
 
 * Reboot :-)
+
 #+begin_src bash
 exit
 reboot
