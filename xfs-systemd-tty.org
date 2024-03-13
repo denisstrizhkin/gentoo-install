@@ -41,18 +41,10 @@ echo -e 'size=256M, type="efi system", bootable \n size=1G, type="swap" \n size=
 #+end_src
 
 * Filesystems
-EFI partition
+
 #+begin_src bash
 mkfs.fat -F32 /dev/vda1
-#+end_src
-
-swap partition
-#+begin_src bash
 mkswap /dev/vda2
-#+end_src
-
-rootfs parition
-#+begin_src bash
 mkfs.xfs /dev/vda3
 #+end_src
 
@@ -67,11 +59,6 @@ mount /dev/vda3 /mnt/gentoo
 #+end_src
 
 * Getting stage3
-
-Sync live image clock
-#+begin_src bash
-chronyd -q
-#+end_src
 
 Download stage3
 I will use default systemd merged-usr here
@@ -96,6 +83,7 @@ Set march=native
 #+begin_src bash
 cd /mnt/gentoo
 nano ./etc/portage/make.conf
+mirrorselect -S -R Europe -o -s3 > ./etc/portage/make.conf
 #+end_src
 
 Chroot
@@ -126,12 +114,7 @@ echo 'FEATURES="${FEATURES} getbinpkg binpkg-request-signature parallel-install 
 Getting repositories snapshot
 #+begin_src bash
 emerge-webrsync
-#+end_src
-
-Get bash-completion
-#+begin_src bash
-emerge bash-completion
-source /etc/profile
+emerge --sync
 #+end_src
 
 Setup GPG keys
@@ -139,20 +122,24 @@ Setup GPG keys
 getuto
 #+end_src
 
-Emerge tmux
+Get bash-completion
 #+begin_src bash
-emerge tmux
+emerge -j5 bash-completion tmux
+source /etc/profile
 #+end_src
 
-Selecting mirrors
+* Start using tmux
+
+Launch tmux
 #+begin_src bash
-emerge mirrorselect && mirrorselect -S -R Europe -s3
+tmux
 #+end_src
 
-Syncing mirrors
-#+begin_src bash
-emerge --sync
-#+end_src
+- use [ ctrl-b + % ] to make a vertical split
+- use [ ctrl-b + arrows ] to switch panes
+- use [ ctrl-b + c] to make a new window
+- use [ ctrl-b + 0-9 ] to switch windows
+- use [ ctrl-b + d ] to detach
 
 * Setting locales
 
@@ -201,12 +188,18 @@ echo 'sys-kernel/linux-firmware linux-fw-redistributable' > /etc/portage/package
 emerge linux-firmware
 #+end_src
 
+Install installkernel script
+#+begin_src bash
+echo 'sys-kernel/installkernel dracut systemd-boot' >> /etc/portage/package.use
+echo 'sys-apps/systemd boot' >> /etc/portage/package.use
+emerge -j5 installkernel
+#+end_src
+
 Get kernel
 #+begin_src bash
-echo 'sys-kernel/installkernel dracut systemd-boot\nsys-apps/systemd boot' >> /etc/portage/package.use
 > /etc/kernel/cmdline
 > /etc/fstab
-emerge -av gentoo-kernel-bin
+emerge gentoo-kernel-bin
 #+end_src
 
 * Network Stack
