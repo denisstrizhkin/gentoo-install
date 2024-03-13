@@ -81,9 +81,8 @@ tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 
 Set march=native
 #+begin_src bash
-cd /mnt/gentoo
 nano ./etc/portage/make.conf
-mirrorselect -S -R Europe -o -s3 > ./etc/portage/make.conf
+mirrorselect -S -R Europe -o -s3 >> ./etc/portage/make.conf
 #+end_src
 
 Chroot
@@ -155,20 +154,8 @@ eselect locale set <N>
 env-update && source /etc/profile
 #+end_src
 
-* Setting CPU flags and updating world
+* Update @world
 
-Get bash-completion & cpuidflags
-#+begin_src bash
-emerge cpuid2cpuflags
-#+end_src
-
-Set cpu flags
-#+begin_src bash
-rmdir /etc/portage/package.use
-echo "*/* $(cpuid2cpuflags)" > /etc/portage/package.use
-#+end_src
-
-Update @world
 #+begin_src bash
 emerge -j5 -DNu @world
 #+end_src
@@ -184,15 +171,16 @@ systemctl preset-all --preset-mode=enable-only
 
 Get firmware
 #+begin_src bash
-echo 'sys-kernel/linux-firmware linux-fw-redistributable' > /etc/portage/package.license
+echo 'sys-kernel/linux-firmware linux-fw-redistributable' > ./package.license
 emerge linux-firmware
 #+end_src
 
 Install installkernel script
 #+begin_src bash
-echo 'sys-kernel/installkernel dracut systemd-boot' >> /etc/portage/package.use
-echo 'sys-apps/systemd boot' >> /etc/portage/package.use
+echo 'sys-kernel/installkernel dracut systemd-boot' >> ./package.use
+echo 'sys-apps/systemd boot' >> ./package.use
 emerge -j5 installkernel
+bootctl install
 #+end_src
 
 Get kernel
@@ -206,7 +194,7 @@ emerge gentoo-kernel-bin
 
 Install NetworkManager
 #+begin_src bash
-echo 'net-misc/networkmanager iwd' >> /etc/portage/package.use
+echo 'net-misc/networkmanager iwd' >> ./package.use
 emerge networkmanager
 systemctl enable NetworkManager
 #+end_src
@@ -216,13 +204,6 @@ systemctl enable NetworkManager
 Set root password
 #+begin_src bash
 passwd
-#+end_src
-
-* Bootloader
-
-#+begin_src bash
-bootctl install
-emerge --config gentoo-kernel-bin
 #+end_src
 
 * Reboot :-)
