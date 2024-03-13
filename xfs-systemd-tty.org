@@ -204,7 +204,7 @@ emerge linux-firmware
 Get kernel
 #+begin_src bash
 echo 'sys-kernel/installkernel dracut systemd-boot\nsys-apps/systemd boot' >> /etc/portage/package.use
-touch /etc/kernel/cmdline
+> /etc/kernel/cmdline
 > /etc/fstab
 emerge -av gentoo-kernel-bin
 #+end_src
@@ -224,7 +224,6 @@ Set root password
 #+begin_src bash
 passwd
 #+end_src
-
 
 * Bootloader
 
