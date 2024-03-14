@@ -36,6 +36,8 @@ tmux
 - use [ ctrl-b + 0-9 ] to switch windows
 - use [ ctrl-b + d ] to detach
 
+Create 3 windows from the beginning
+
 * Format the drives
 
 I will use layout from the handbook for EFI GPT setup.
@@ -72,6 +74,8 @@ mount /dev/vda3 /mnt/gentoo
 
 * Getting stage3
 
+All done in 1st tmux window
+
 Download stage3
 I will use default systemd merged-usr here
 #+begin_src bash
@@ -86,39 +90,44 @@ tar xpf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 
 * Chrooting
 
-Set repositories
+In the 2nd tmux window prepare repos.conf.
+Set rsync mirror to rsync://rsync2.ru.gentoo.org/gentoo-portage/.
+Set dist repositories.
 #+begin_src bash
+nano /usr/share/portage/config/repos.conf
+cp /usr/share/portage/config/repos.conf ./etc/portage/repos.conf
 mirrorselect -S -R Europe -o -s3 >> ./etc/portage/make.conf
-mkdir /etc/portage/repos.conf
-cp /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
-mirrorselect -r -i
-rsync -a /etc/portage/repos.conf ./etc/portage
 #+end_src
 
-Chroot
+In the 1st tmux window do an arch-chroot.
 #+begin_src bash
 cp -L /etc/resolv.conf ./etc
 arch-chroot .
 #+end_src
 
-Mount EFI partition
+Mount EFI partition. (1st window)
 #+begin_src bash
 mkdir /efi
 mount /dev/vda1 /efi
 cd /etc/portage
 #+end_src
 
+In the 2nd tmux window do regular chroot.
+#+begin_src bash
+chroot .
+cd /etc/portage
+#+end_src
+
 * Syncing repositories
 
-Set FEATURES
+Set FEATURES (2nd window)
 #+begin_src bash
 echo 'FEATURES="getbinpkg binpkg-request-signature parallel-install -ebuild-locks"' >> ./make.conf
 #+end_src
 
-Getting repositories snapshot
+Getting repositories snapshot (1st window)
 #+begin_src bash
-emerge-webrsync
-emerge --sync
+emerge-webrsync && emerge --sync
 #+end_src
 
 Setup GPG keys
