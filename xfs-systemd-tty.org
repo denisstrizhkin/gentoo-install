@@ -5,8 +5,6 @@
 I will try to follow handbook as much as possible. Haven't read it
 in a long time
 
-** TODO use sed for march native
-
 * Checking that everything is OK
 
 Check that drives are there :-)
@@ -24,6 +22,20 @@ Check efivars
 ls /sys/firmware/efi/efivars
 #+end_src
 
+* Start using tmux
+
+Launch tmux
+#+begin_src bash
+sudo su -
+tmux
+#+end_src
+
+- use [ ctrl-b + % ] to make a vertical split
+- use [ ctrl-b + arrows ] to switch panes
+- use [ ctrl-b + c] to make a new window
+- use [ ctrl-b + 0-9 ] to switch windows
+- use [ ctrl-b + d ] to detach
+
 * Format the drives
 
 I will use layout from the handbook for EFI GPT setup.
@@ -37,7 +49,7 @@ echo 'label: gpt' | sfdisk /dev/vda
 
 Creating partitions
 #+begin_src bash
-echo -e 'size=256M, type="efi system", bootable \n size=1G, type="swap" \n size=+, type="linux root x86-64"' | sfdisk /dev/vda
+echo -e ',256M,"efi system",*\n,1G,swap\n,+,"linux root x86-64"' | sfdisk /dev/vda
 #+end_src
 
 * Filesystems
@@ -74,9 +86,13 @@ tar xpf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 
 * Chrooting
 
-Set march=native
+Set repositories
 #+begin_src bash
 mirrorselect -S -R Europe -o -s3 >> ./etc/portage/make.conf
+mkdir /etc/portage/repos.conf
+cp /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
+mirrorselect -r -i
+rsync -a /etc/portage/repos.conf ./etc/portage
 #+end_src
 
 Chroot
@@ -94,14 +110,9 @@ cd /etc/portage
 
 * Syncing repositories
 
-Copy repos.conf
-#+begin_src bash
-cp /usr/share/portage/config/repos.conf .
-#+end_src
-
 Set FEATURES
 #+begin_src bash
-echo 'FEATURES="${FEATURES} getbinpkg binpkg-request-signature parallel-install -ebuild-locks"' >> ./make.conf
+echo 'FEATURES="getbinpkg binpkg-request-signature parallel-install -ebuild-locks"' >> ./make.conf
 #+end_src
 
 Getting repositories snapshot
@@ -117,22 +128,9 @@ getuto
 
 Get bash-completion
 #+begin_src bash
-emerge -j5 bash-completion tmux
+emerge -j5 bash-completion
 source /etc/profile
 #+end_src
-
-* Start using tmux
-
-Launch tmux
-#+begin_src bash
-tmux
-#+end_src
-
-- use [ ctrl-b + % ] to make a vertical split
-- use [ ctrl-b + arrows ] to switch panes
-- use [ ctrl-b + c] to make a new window
-- use [ ctrl-b + 0-9 ] to switch windows
-- use [ ctrl-b + d ] to detach
 
 * Setting locales
 
@@ -188,7 +186,8 @@ emerge gentoo-kernel-bin
 
 Install NetworkManager
 #+begin_src bash
-echo 'net-misc/networkmanager iwd' >> ./package.use
+echo '*/* -gtk-doc' >> ./package.use
+echo 'net-misc/networkmanager -ppp -wext -modemmanager iwd' >> ./package.use
 emerge networkmanager
 systemctl enable NetworkManager
 #+end_src
