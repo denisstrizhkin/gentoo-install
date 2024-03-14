@@ -64,7 +64,7 @@ Download stage3
 I will use default systemd merged-usr here
 #+begin_src bash
 cd /mnt/gentoo
-links gentoo.org
+links gentoo.org/downloads
 #+end_src
 
 Installing stage3
@@ -76,7 +76,6 @@ tar xpf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 
 Set march=native
 #+begin_src bash
-nano ./etc/portage/make.conf
 mirrorselect -S -R Europe -o -s3 >> ./etc/portage/make.conf
 #+end_src
 
@@ -102,7 +101,7 @@ cp /usr/share/portage/config/repos.conf .
 
 Set FEATURES
 #+begin_src bash
-echo 'FEATURES="${FEATURES} getbinpkg binpkg-request-signature parallel-install -ebuild-locks"' >> /etc/portage/make.conf
+echo 'FEATURES="${FEATURES} getbinpkg binpkg-request-signature parallel-install -ebuild-locks"' >> ./make.conf
 #+end_src
 
 Getting repositories snapshot
