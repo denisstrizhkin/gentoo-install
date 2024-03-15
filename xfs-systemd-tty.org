@@ -96,7 +96,7 @@ Set dist repositories.
 #+begin_src bash
 nano /usr/share/portage/config/repos.conf
 cp /usr/share/portage/config/repos.conf ./etc/portage/repos.conf
-mirrorselect -S -R Europe -o -s3 >> ./etc/portage/make.conf
+mirrorselect -S -c Russia -o >> ./etc/portage/make.conf
 #+end_src
 
 In the 1st tmux window do an arch-chroot.
@@ -122,23 +122,12 @@ cd /etc/portage
 
 Set FEATURES (2nd window)
 #+begin_src bash
-echo 'FEATURES="getbinpkg binpkg-request-signature parallel-install -ebuild-locks"' >> ./make.conf
+echo 'FEATURES="getbinpkg binpkg-request-signature"' >> ./make.conf
 #+end_src
 
 Getting repositories snapshot (1st window)
 #+begin_src bash
 emerge-webrsync && emerge --sync
-#+end_src
-
-Setup GPG keys
-#+begin_src bash
-getuto
-#+end_src
-
-Get bash-completion
-#+begin_src bash
-emerge -j5 bash-completion
-source /etc/profile
 #+end_src
 
 * Setting locales
@@ -152,13 +141,6 @@ locale-gen
 Set locale to en_US.UTF-E
 #+begin_src bash
 eselect locale set <N>
-env-update && source /etc/profile
-#+end_src
-
-* Update @world
-
-#+begin_src bash
-emerge -j5 -DNu @world
 #+end_src
 
 * Kernel and Firmware
@@ -180,7 +162,7 @@ Install installkernel script
 #+begin_src bash
 echo 'sys-kernel/installkernel dracut systemd-boot' >> ./package.use
 echo 'sys-apps/systemd boot' >> ./package.use
-emerge -j5 installkernel
+emerge -j5 gentoo-kernel-bin
 bootctl install
 #+end_src
 
@@ -188,7 +170,6 @@ Get kernel
 #+begin_src bash
 > /etc/kernel/cmdline
 > /etc/fstab
-emerge gentoo-kernel-bin
 #+end_src
 
 * Network Stack
@@ -197,7 +178,7 @@ Install NetworkManager
 #+begin_src bash
 echo '*/* -gtk-doc' >> ./package.use
 echo 'net-misc/networkmanager -ppp -wext -modemmanager iwd' >> ./package.use
-emerge networkmanager
+emerge -j5 networkmanager
 systemctl enable NetworkManager
 #+end_src
 
