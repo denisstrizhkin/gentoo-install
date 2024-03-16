@@ -51,7 +51,7 @@ echo 'label: gpt' | sfdisk /dev/vda
 
 Creating partitions
 #+begin_src bash
-echo -e ',256M,"efi system",*\n,1G,swap\n,+,"linux root x86-64"' | sfdisk /dev/vda
+echo -e ',256M,uefi,*\n,1G,swap\n,+,"linux root x86-64"' | sfdisk /dev/vda
 #+end_src
 
 * Filesystems
@@ -60,11 +60,6 @@ echo -e ',256M,"efi system",*\n,1G,swap\n,+,"linux root x86-64"' | sfdisk /dev/v
 mkfs.fat -F32 /dev/vda1
 mkswap /dev/vda2
 mkfs.xfs /dev/vda3
-#+end_src
-
-Check myself
-#+begin_src bash
-lsblk -f
 #+end_src
 
 Mount rootfs partition
@@ -80,7 +75,7 @@ Download stage3
 I will use default systemd merged-usr here
 #+begin_src bash
 cd /mnt/gentoo
-links gentoo.org/downloads
+links ftp.lysator.liu.se/gentoo
 #+end_src
 
 Installing stage3
@@ -94,14 +89,12 @@ In the 2nd tmux window prepare repos.conf.
 Set rsync mirror to rsync://rsync2.ru.gentoo.org/gentoo-portage/.
 Set dist repositories.
 #+begin_src bash
-nano /usr/share/portage/config/repos.conf
-cp /usr/share/portage/config/repos.conf ./etc/portage/repos.conf
-mirrorselect -S -c Russia -o >> ./etc/portage/make.conf
+echo 'GENTOO_MIRRORS="https://ftp.lysator.liu.se/gentoo/' >> /etc/portage/make.conf
 #+end_src
 
 In the 1st tmux window do an arch-chroot.
 #+begin_src bash
-cp -L /etc/resolv.conf ./etc
+cp /etc/resolv.conf ./etc
 arch-chroot .
 #+end_src
 
@@ -120,14 +113,10 @@ cd /etc/portage
 
 * Syncing repositories
 
-Set FEATURES (2nd window)
+Syncing repositories and emerging firmware
 #+begin_src bash
-echo 'FEATURES="getbinpkg binpkg-request-signature"' >> ./make.conf
-#+end_src
-
-Getting repositories snapshot (1st window)
-#+begin_src bash
-emerge-webrsync && emerge --sync
+echo 'sys-kernel/linux-firmware linux-fw-redistributable' > ./package.license
+emerge-webrsync && getuto && emerge linux-firmware
 #+end_src
 
 * Setting locales
@@ -150,12 +139,6 @@ SystemD initial setup
 systemd-machine-id-setup
 systemd-firstboot --prompt
 systemctl preset-all --preset-mode=enable-only
-#+end_src
-
-Get firmware
-#+begin_src bash
-echo 'sys-kernel/linux-firmware linux-fw-redistributable' > ./package.license
-emerge linux-firmware
 #+end_src
 
 Install installkernel script
