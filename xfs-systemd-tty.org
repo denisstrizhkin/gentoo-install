@@ -54,6 +54,14 @@ Creating partitions
 echo -e ',256M,uefi,*\n,1G,swap\n,+,"linux root x86-64"' | sfdisk /dev/vda
 #+end_src
 
+#+begin_src bash
+sfdisk /dev/vda<<EOF
+,256M,U,*
+,1G,S
+,+,"linux root x86-64"
+EOF
+#+end_src
+
 * Filesystems
 
 #+begin_src bash
@@ -117,19 +125,6 @@ Syncing repositories and emerging firmware
 #+begin_src bash
 echo 'sys-kernel/linux-firmware linux-fw-redistributable' > ./package.license
 emerge-webrsync && getuto && emerge linux-firmware
-#+end_src
-
-* Setting locales
-
-Generate locales
-#+begin_src bash
-echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
-locale-gen
-#+end_src
-
-Set locale to en_US.UTF-E
-#+begin_src bash
-eselect locale set <N>
 #+end_src
 
 * Kernel and Firmware
